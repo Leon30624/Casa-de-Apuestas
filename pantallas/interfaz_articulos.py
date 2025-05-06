@@ -6,10 +6,9 @@ class CrudArticulos(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__(expand=True)
         self.page = page
-        self.page.title = "CRUD Articulos"
-        self.page.window_min_height = 500
-        self.page.window_min_width = 100
-        self.bgcolor = "Black"
+        #self.page.title = "CRUD Articulos"
+        #self.page.window_min_height = 500
+        #self.page.window_min_width = 100
         
         self.data = ArticuloCRUD()
         self.cat_crud = CategoriaCRUD()
@@ -100,10 +99,12 @@ class CrudArticulos(ft.Container):
         self.show_data()
         
         self.form = ft.Container(
-            bgcolor = "#222222",
-            border_radius = 10,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
             col = 4,
-            padding= 10,
+            padding = 20,
+            margin=ft.Margin(left=0, right=0, top=10, bottom=10),
+            width=350,
             content = ft.Column(
                 alignment=ft.MainAxisAlignment.SPACE_AROUND,
                 horizontal_alignment=ft.MainAxisAlignment.CENTER,
@@ -167,8 +168,10 @@ class CrudArticulos(ft.Container):
         )
         
         self.table = ft.Container(
-            bgcolor = "#222222",
-            border_radius = 10,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
+            padding=20,
+            margin=ft.Margin(left=5, right=10, top=10, bottom=10),
             col = 8,
             content = ft.Column(
                 controls = [
@@ -197,7 +200,17 @@ class CrudArticulos(ft.Container):
             )
         )
         
-        self.page.add(
+        self.content = ft.ResponsiveRow(
+            expand=True,
+            controls=[
+                self.form,
+                self.table
+            ]
+        )
+        
+        self.controls = [self.content]
+        
+        """self.page.add(
             ft.ResponsiveRow(
                 expand=True,
                 controls=[
@@ -205,7 +218,7 @@ class CrudArticulos(ft.Container):
                     self.table
                 ]  
             )
-        )
+        )"""
     
     def show_data(self):
         self.data_table.rows.clear()
@@ -232,7 +245,7 @@ class CrudArticulos(ft.Container):
         precio = self.precio.value
         costo = self.costo.value
         stock = self.stock.value
-        categoria_id = self.categoria.value  # Aquí estamos tomando el ID del cargo seleccionado
+        categoria_id = self.categoria.value
         codigo = self.codigo.value
         self.page.update()
 
@@ -331,7 +344,6 @@ class CrudArticulos(ft.Container):
             self.show_data()
             self.selected_row = None 
             
-            # Limpia los campos manualmente
             self.nombre.value = ""
             self.descripcion.value = ""
             self.precio.value = ""
@@ -358,4 +370,5 @@ class CrudArticulos(ft.Container):
 def main(page: ft.Page):
     CrudArticulos(page)
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)

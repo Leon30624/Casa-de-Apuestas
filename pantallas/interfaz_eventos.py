@@ -7,10 +7,9 @@ class CrudEventos(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__(expand=True)
         self.page = page
-        self.page.title = "CRUD Eventos"
-        self.page.window_min_height = 500
-        self.page.window_min_width = 100
-        self.bgcolor = "Black"
+        #self.page.title = "CRUD Eventos"
+        #self.page.window_min_height = 500
+        #self.page.window_min_width = 100
         
         self.data = EventoCRUD()
         self.selected_row = None
@@ -56,10 +55,12 @@ class CrudEventos(ft.Container):
         self.show_data()
         
         self.form = ft.Container(
-            bgcolor="#222222",
-            border_radius=10,
-            col=4,
-            padding=10,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
+            col = 4,
+            padding = 20,
+            margin=ft.Margin(left=0, right=0, top=10, bottom=10),
+            width=350,
             content=ft.Column(
                 alignment=ft.MainAxisAlignment.SPACE_AROUND,
                 horizontal_alignment=ft.MainAxisAlignment.CENTER,
@@ -118,9 +119,11 @@ class CrudEventos(ft.Container):
         )
         
         self.table = ft.Container(
-            bgcolor="#222222",
-            border_radius=10,
-            col=8,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
+            padding=20,
+            margin=ft.Margin(left=5, right=10, top=10, bottom=10),
+            col = 8,
             content=ft.Column(
                 controls=[
                     ft.Container(
@@ -148,7 +151,17 @@ class CrudEventos(ft.Container):
             )
         )
         
-        self.page.add(
+        self.content = ft.ResponsiveRow(
+            expand=True,
+            controls=[
+                self.form,
+                self.table
+            ]
+        )
+        
+        self.controls = [self.content]
+        
+        """self.page.add(
             ft.ResponsiveRow(
                 expand=True,
                 controls=[
@@ -156,7 +169,7 @@ class CrudEventos(ft.Container):
                     self.table
                 ]  
             )
-        )
+        )"""
     
     def show_data(self):
         self.data_table.rows.clear()
@@ -249,13 +262,12 @@ class CrudEventos(ft.Container):
             self.show_data()
 
     def delete_data(self, e):
-        if self.selected_row is not None:  # Verifica si hay una fila seleccionada
-            self.data.eliminar_evento(self.selected_row[0])  # Elimina el registro por id_evento
+        if self.selected_row is not None: 
+            self.data.eliminar_evento(self.selected_row[0]) 
             self.clean_fields()
-            self.show_data()  # Refresca la tabla para mostrar los cambios
-            self.selected_row = None  # Limpia la selección actual
-            
-            # Limpia los campos manualmente
+            self.show_data() 
+            self.selected_row = None  
+
             self.nombre_evento.value = ""
             self.fecha_evento.value = ""
             
@@ -273,4 +285,5 @@ class CrudEventos(ft.Container):
 def main(page: ft.Page):
     CrudEventos(page)
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)

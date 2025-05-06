@@ -1,17 +1,21 @@
 import flet as ft
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from cruds_catalogo import Usuario
+from cruds_catalogo import EmpleadoCRUD, CargoCRUD  
 
-class CrudUsuarios(ft.Container):
+class CrudEmpleados(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__(expand=True)
         self.page = page
-        self.page.title = "CRUD Usuarios"
-        self.page.window_min_height = 500
-        self.page.window_min_width = 100
-        self.bgcolor = "Black"
+        #self.page.title = "CRUD Empleados"
+        #self.page.window_min_height = 500
+        #self.page.window_min_width = 100
         
-        self.data = Usuario()
+        self.data = EmpleadoCRUD()
+        self.cargo_crud = CargoCRUD()
+        self.cargos = self.cargo_crud.leer_cargos() 
         self.selected_row = None
         
         self.nombre = ft.TextField(
@@ -37,13 +41,6 @@ class CrudUsuarios(ft.Container):
             text_style = ft.TextStyle(color = "white", font_family="Minecraft", size= 15),
         )
         
-        self.saldo = ft.TextField(
-            label="Saldo",
-            label_style=ft.TextStyle(font_family="Minecraft", size = 12),
-            border_color="White",
-            text_style = ft.TextStyle(color = "white", font_family="Minecraft", size= 15),
-        )
-        
         self.contraseña = ft.TextField(
             label="Contraseña",
             label_style=ft.TextStyle(font_family="Minecraft", size = 12),
@@ -52,8 +49,19 @@ class CrudUsuarios(ft.Container):
             password=True
         )
         
+        self.cargo = ft.Dropdown(
+            label="Cargo",
+            label_style=ft.TextStyle(font_family="Minecraft", size = 12),
+            border_color="White",
+            text_style = ft.TextStyle(color = "white", font_family="Minecraft", size= 15),
+            options=[
+                ft.dropdown.Option(str(c[0]), text=c[1]) for c in self.cargos
+            ],
+            width=150
+        )
+        
         self.search_filed = ft.TextField(
-            label = "Buscar por teléfono",
+            label = "Buscar por telefono",
             suffix_icon=ft.Icons.SEARCH,
             border = ft.InputBorder.UNDERLINE,
             border_color = "white",
@@ -74,18 +82,20 @@ class CrudUsuarios(ft.Container):
                 ft.DataColumn(ft.Text("Telefono", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center"), numeric = True),
                 ft.DataColumn(ft.Text("Nombre", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center")),
                 ft.DataColumn(ft.Text("Correo", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center")),
-                ft.DataColumn(ft.Text("Saldo", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center"), numeric = True),
                 ft.DataColumn(ft.Text("Contraseña", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center")),
+                ft.DataColumn(ft.Text("Cargo", color="white", weight="bold", font_family="Minecraft", size = 11, text_align="center")),
             ]
         )
         
         self.show_data()
         
         self.form = ft.Container(
-            bgcolor = "#222222",
-            border_radius = 10,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
             col = 4,
-            padding= 10,
+            padding = 20,
+            margin=ft.Margin(left=0, right=0, top=10, bottom=10),
+            width=350,
             content = ft.Column(
                 alignment=ft.MainAxisAlignment.SPACE_AROUND,
                 horizontal_alignment=ft.MainAxisAlignment.CENTER,
@@ -98,7 +108,7 @@ class CrudUsuarios(ft.Container):
                     self.nombre,
                     self.telefono,
                     self.correo,
-                    self.saldo,
+                    self.cargo,
                     self.contraseña,
                     
                     ft.Container(
@@ -147,8 +157,10 @@ class CrudUsuarios(ft.Container):
         )
         
         self.table = ft.Container(
-            bgcolor = "#222222",
-            border_radius = 10,
+            bgcolor = "#2f3136",
+            border_radius = ft.border_radius.all(8),
+            padding=20,
+            margin=ft.Margin(left=5, right=10, top=10, bottom=10),
             col = 8,
             content = ft.Column(
                 controls = [
@@ -177,7 +189,17 @@ class CrudUsuarios(ft.Container):
             )
         )
         
-        self.page.add(
+        self.content = ft.ResponsiveRow(
+            expand=True,
+            controls=[
+                self.form,
+                self.table
+            ]
+        )
+        
+        self.controls = [self.content]
+        
+        """self.page.add(
             ft.ResponsiveRow(
                 expand=True,
                 controls=[
@@ -185,11 +207,11 @@ class CrudUsuarios(ft.Container):
                     self.table
                 ]  
             )
-        )
+        )"""
     
     def show_data(self):
         self.data_table.rows.clear()
-        for x in self.data.leer_usuarios():
+        for x in self.data.leer_empleados():
             self.data_table.rows.append(
                 ft.DataRow(
                     on_select_changed=self.get_index,
@@ -208,28 +230,36 @@ class CrudUsuarios(ft.Container):
         telefono = self.telefono.value
         nombre = self.nombre.value
         correo = self.correo.value
-        saldo = self.saldo.value
         contraseña = self.contraseña.value
+        cargo_id = self.cargo.value
         self.page.update()
-        
-        if len(telefono) > 0 and len(nombre) > 0 and len(correo) > 0 and len(saldo) > 0 and len(contraseña) > 0:
+
+        if len(telefono) > 0 and len(nombre) > 0 and len(correo) > 0 and len(cargo_id) > 0 and len(contraseña) > 0:
             contact_exist = False
-            for row in self.data.leer_usuarios():
+            for row in self.data.leer_empleados():
                 if row[0] == telefono:
                     contact_exist = True
                     break
             if not contact_exist:
                 self.clean_fields()
-                self.data.insertar_usuarios(telefono, nombre, correo, saldo, contraseña)
+                self.data.insertar_empleado(telefono, nombre, correo, contraseña, cargo_id)
                 self.show_data()
             else:
                 print("El contacto ya existe.")
+    
+    def cargar_cargos_dropdown(self):
+        cargos = self.data.leer_cargos()
+        self.cargo.options = [
+            ft.dropdown.Option(str(c[0]), text=c[1]) for c in cargos
+        ]
+        self.cargo.value = str(cargos[0][0]) if cargos else None
+        self.page.update()
     
     def get_index(self, e):
         e.control.selected = not e.control.selected
         
         name = e.control.cells[0].content.value
-        for row in self.data.leer_usuarios():
+        for row in self.data.leer_empleados():
             if row[0] == name:
                 self.selected_row = row
                 break
@@ -241,8 +271,8 @@ class CrudUsuarios(ft.Container):
             self.telefono.value = self.selected_row[0]
             self.nombre.value = self.selected_row[1]
             self.correo.value = self.selected_row[2]
-            self.saldo.value = self.selected_row[3]
-            self.contraseña.value = self.selected_row[4]
+            self.contraseña.value = self.selected_row[3]
+            self.cargo.value = self.selected_row[4]
             self.page.update()
         except TypeError:
             print("Error")  
@@ -251,20 +281,20 @@ class CrudUsuarios(ft.Container):
         telefono = self.telefono.value
         nombre = self.nombre.value
         correo = self.correo.value
-        saldo = self.saldo.value
         contraseña = self.contraseña.value
+        cargo_id = self.cargo.value 
         self.page.update()
-        
+
         if len(telefono) and len(nombre) and len(correo) > 0:
             self.clean_fields()
-            self.data.actualizar_usuarios(self.selected_row[0], nombre, correo, saldo, contraseña)
+            self.data.actualizar_empleado(self.selected_row[0], nombre, correo, contraseña, cargo_id)
             self.show_data()
             self.selected_row = None
             self.page.update()
     
     def search_data(self, e):
         search = self.search_filed.value.lower()
-        telefono = list(filter(lambda x: search in x[0].lower(), self.data.leer_usuarios()))
+        telefono = list(filter(lambda x: search in x[0].lower(), self.data.leer_empleados()))
         self.data_table.rows = []
         if not self.search_filed.value == "":
             if len(telefono) > 0:
@@ -286,36 +316,34 @@ class CrudUsuarios(ft.Container):
             self.show_data()
 
     def delete_data(self, e):
-        if self.selected_row is not None:  # Verifica si hay una fila seleccionada
-            self.data.eliminar_usuarios(self.selected_row[0])  # Elimina el registro por teléfono
+        if self.selected_row is not None: 
+            self.data.eliminar_empleado(self.selected_row[0])  
             self.clean_fields()
-            self.show_data()  # Refresca la tabla para mostrar los cambios
-            self.selected_row = None  # Limpia la selección actual
+            self.show_data()  
+            self.selected_row = None  
             
-            # Limpia los campos manualmente
             self.telefono.value = ""
             self.nombre.value = ""
             self.correo.value = ""
-            self.saldo.value = ""
             self.contraseña.value = ""
+            self.cargo.value = ""
             
             self.page.update()
             print("Registro eliminado exitosamente.")
         else:
             print("No hay ninguna fila seleccionada para eliminar.")
-
-
     
     def clean_fields(self):
         self.telefono.value = ""
         self.nombre.value = ""
         self.correo.value = ""
-        self.saldo.value = ""
         self.contraseña.value = ""
+        self.cargo.value = ""
         
         self.page.update()
 
 def main(page: ft.Page):
-    CrudUsuarios(page)
+    CrudEmpleados(page)
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)
