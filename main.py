@@ -15,7 +15,7 @@ class BotonNavegacion(ft.IconButton):
             style=ft.ButtonStyle(
                 shape=shape,
                 padding=10,
-                bgcolor=bgcolor if not selected else "#7289da",  # Cambia el color si está seleccionado
+                bgcolor=bgcolor if not selected else "#7289da",
                 overlay_color="#7289da",
                 side=side
             ),
@@ -87,7 +87,7 @@ def pantalla_inicio():
                         font_family="Minecraft",
                     )
                 ],
-                spacing=0,  # <- Sin espacio entre los textos
+                spacing=0,
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             ),
@@ -106,7 +106,7 @@ def main(page:ft.Page):
     page.window_min_height = 500
 
     cont_principal = ft.Column(expand=True)
-    botones_cruds = [] # Inicializamos la lista vacía para poder referenciar los botones
+    botones_cruds = []
 
     def cambiar_pantalla(pantalla_func, boton_seleccionado):
         cont_principal.controls.clear()
@@ -133,7 +133,7 @@ def main(page:ft.Page):
         icon=ft.Icons.HOME, tooltip="Inicio", shape=ft.RoundedRectangleBorder(radius=10),
         bgcolor="#28282d", side=ft.BorderSide(1, "#28282d"),
         on_click=lambda e: cambiar_pantalla(pantalla_inicio(), boton_inicio),
-        selected=True # El botón de inicio estará seleccionado al inicio
+        selected=True
     )
     botones_cruds.append(boton_inicio)
     
